@@ -9,13 +9,12 @@
 services:
   portal:
     build: .
-    image: approval-portal:1.1
     restart: unless-stopped
     ports:
       - "${PORTAL_PORT:-3000}:3000"
     environment:
       PAPERLESS_URL: "${PAPERLESS_URL:-http://192.168.10.109:8010}"
-      PAPERLESS_PUBLIC_URL: "${PAPERLESS_PUBLIC_URL:-http://192.168.10.109:801}"
+      PAPERLESS_PUBLIC_URL: "${PAPERLESS_PUBLIC_URL:-http://192.168.10.109:8010}"
       PAPERLESS_SERVICE_TOKEN: "${PAPERLESS_SERVICE_TOKEN:-c4e854dd2ddcb5a5c28fec8720688188f54718d6}"
       PAPERLESS_HOST_HEADER: "${PAPERLESS_HOST_HEADER:-}"
       PAPERLESS_WEBHOOK_SECRET: "${PAPERLESS_WEBHOOK_SECRET:-}"

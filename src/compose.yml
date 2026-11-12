@@ -6,7 +6,6 @@ services:
     build:
       context: ..
       dockerfile: Dockerfile
-    image: "${IMAGE_NAME:-approval-portal}:${IMAGE_TAG:-latest}"
     restart: unless-stopped
     ports:
       - "${PORTAL_PORT:-3000}:3000"
