@@ -2,28 +2,30 @@ name: Deploy Portal Approval to Production
 
 on:
   push:
-    branches: ["main"]
+    branches: ["main"] # Ganti dengan "master" jika branch utama Anda master
 
 jobs:
   deploy:
-    runs-on: self-hosted
+    runs-on: self-hosted # Menggunakan runner di server Linux produksi Anda
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Build and Restart Docker Compose
+      - name: Verify Environment File (.env)
         run: |
-          # 1. Pindah ke folder project asli di server Anda tempat file .env berada
-          # (Ganti path di bawah dengan direktori asli project Anda di server)
-          /home/administrator/docker/dmsportal
-
-          echo "Memeriksa keberadaan file .env..."
+          # Memastikan file .env sudah ada di server sebelum compose dijalankan
           if [ ! -f .env ]; then
-            echo "Error: File .env tidak ditemukan di direktori ini!"
+            echo "Error: File .env tidak ditemukan di direktori server!"
+            echo "Silakan buat file .env berdasarkan .env.example terlebih dahulu."
             exit 1
           fi
 
+      - name: Build and Restart Docker Compose
+        run: |
           echo "Menjalankan proses build dan restart container portal approval..."
+
+          # Turunkan kontainer lama, build image baru, dan jalankan di background
           docker compose down
           docker compose up -d --build
+
           echo "Deployment berhasil diselesaikan!"
