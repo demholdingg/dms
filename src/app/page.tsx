@@ -225,7 +225,7 @@ export default async function Home() {
         <Card className="dashboard-panel">
           <CardHeader className="panel-heading">
             <div>
-              <CardTitle>Audit akses terkini</CardTitle>
+              <CardTitle>Audit akses terkini check</CardTitle>
               <CardDescription>
                 Pembukaan dan unduhan dokumen yang berhasil melalui portal.
               </CardDescription>
