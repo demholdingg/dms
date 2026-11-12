@@ -2,7 +2,7 @@ name: Deploy Portal Approval to Production
 
 on:
   push:
-    branches: ["develop"] # Ganti dengan "master" jika branch utama Anda master
+    branches: ["main"] # Ganti dengan "master" jika branch utama Anda master
 
 jobs:
   deploy:
