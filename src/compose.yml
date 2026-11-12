@@ -1,0 +1,52 @@
+# Optional stack including the tunnel. Prefer ../compose.yml for deployments
+# that do not need a Cloudflare Tunnel.
+
+services:
+  portal:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    image: "${IMAGE_NAME:-approval-portal}:${IMAGE_TAG:-latest}"
+    restart: unless-stopped
+    ports:
+      - "${PORTAL_PORT:-3000}:3000"
+    environment:
+      PAPERLESS_URL: "${PAPERLESS_URL:-http://webserver:8000}"
+      PAPERLESS_PUBLIC_URL: "${PAPERLESS_PUBLIC_URL:-http://localhost:8000}"
+      PAPERLESS_SERVICE_TOKEN: "${PAPERLESS_SERVICE_TOKEN:?isi PAPERLESS_SERVICE_TOKEN}"
+      PAPERLESS_HOST_HEADER: "${PAPERLESS_HOST_HEADER:-}"
+      SESSION_SECRET: "${SESSION_SECRET:?isi SESSION_SECRET (min 32 karakter)}"
+      SESSION_HOURS: "${SESSION_HOURS:-8}"
+      COOKIE_SECURE: "${COOKIE_SECURE:-false}"
+      APP_URL: "${APP_URL:-http://localhost:3000}"
+      DISPLAY_TZ: "${DISPLAY_TZ:-Asia/Jakarta}"
+      SEARCH_MIN_CHARS: "${SEARCH_MIN_CHARS:-3}"
+      MAX_GRANT_ATTEMPTS: "${MAX_GRANT_ATTEMPTS:-10}"
+      AUDIT_URL: "${AUDIT_URL:-http://audit:8080}"
+      AUDIT_API_KEY: "${AUDIT_API_KEY:-}"
+      AUDIT_VIEWERS: "${AUDIT_VIEWERS:-}"
+      NOTIFY_WEBHOOK_URL: "${NOTIFY_WEBHOOK_URL:-}"
+      SMTP_HOST: "${SMTP_HOST:-}"
+      SMTP_PORT: "${SMTP_PORT:-587}"
+      SMTP_USER: "${SMTP_USER:-}"
+      SMTP_PASS: "${SMTP_PASS:-}"
+      SMTP_FROM: "${SMTP_FROM:-approval@localhost}"
+    volumes:
+      - portal_data:/data
+    networks: [paperless]
+
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: "${TUNNEL_TOKEN:?isi TUNNEL_TOKEN}"
+    networks: [paperless]
+
+volumes:
+  portal_data:
+
+networks:
+  paperless:
+    external: true
+    name: "${PAPERLESS_NETWORK:?isi PAPERLESS_NETWORK}"
