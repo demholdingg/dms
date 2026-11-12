@@ -2,9 +2,9 @@ name: CI and deployment
 
 on:
   pull_request:
-    branches: [develop, main]
+    branches: [main]
   push:
-    branches: [develop, main]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -43,47 +43,6 @@ jobs:
           SESSION_SECRET: build-only-placeholder-build-only-placeholder
           PAPERLESS_SERVICE_TOKEN: build-only-placeholder
 
-  deploy-development:
-    name: Deploy development
-    if: github.ref == 'refs/heads/develop' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
-    needs: validate
-    runs-on: [self-hosted, linux]
-    environment:
-      name: development
-    steps:
-      - name: Check out source
-        uses: actions/checkout@v4
-
-      - name: Deploy with Docker Compose
-        run: |
-          docker compose -f src/compose.yml --project-name approval-portal-development config --quiet
-          docker compose -f src/compose.yml --project-name approval-portal-development up -d --build --wait --wait-timeout 120 --remove-orphans
-        env:
-          IMAGE_TAG: ${{ github.sha }}
-          PORTAL_PORT: ${{ vars.PORTAL_PORT }}
-          PAPERLESS_NETWORK: ${{ vars.PAPERLESS_NETWORK }}
-          PAPERLESS_URL: ${{ vars.PAPERLESS_URL }}
-          PAPERLESS_PUBLIC_URL: ${{ vars.PAPERLESS_PUBLIC_URL }}
-          PAPERLESS_SERVICE_TOKEN: ${{ secrets.PAPERLESS_SERVICE_TOKEN }}
-          PAPERLESS_HOST_HEADER: ${{ vars.PAPERLESS_HOST_HEADER }}
-          SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
-          SESSION_HOURS: ${{ vars.SESSION_HOURS }}
-          COOKIE_SECURE: ${{ vars.COOKIE_SECURE }}
-          APP_URL: ${{ vars.APP_URL }}
-          DISPLAY_TZ: ${{ vars.DISPLAY_TZ }}
-          SEARCH_MIN_CHARS: ${{ vars.SEARCH_MIN_CHARS }}
-          MAX_GRANT_ATTEMPTS: ${{ vars.MAX_GRANT_ATTEMPTS }}
-          AUDIT_URL: ${{ vars.AUDIT_URL }}
-          AUDIT_API_KEY: ${{ secrets.AUDIT_API_KEY }}
-          AUDIT_VIEWERS: ${{ vars.AUDIT_VIEWERS }}
-          NOTIFY_WEBHOOK_URL: ${{ secrets.NOTIFY_WEBHOOK_URL }}
-          SMTP_HOST: ${{ vars.SMTP_HOST }}
-          SMTP_PORT: ${{ vars.SMTP_PORT }}
-          SMTP_USER: ${{ vars.SMTP_USER }}
-          SMTP_PASS: ${{ secrets.SMTP_PASS }}
-          SMTP_FROM: ${{ vars.SMTP_FROM }}
-          TUNNEL_TOKEN: ${{ secrets.TUNNEL_TOKEN }}
-
   deploy-production:
     name: Deploy production
     if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
@@ -94,6 +53,22 @@ jobs:
     steps:
       - name: Check out source
         uses: actions/checkout@v4
+
+      - name: Validate required deployment configuration
+        run: |
+          : "${PAPERLESS_NETWORK:?Set PAPERLESS_NETWORK in the production environment variables}"
+          : "${PAPERLESS_SERVICE_TOKEN:?Set PAPERLESS_SERVICE_TOKEN in the production environment secrets}"
+          : "${SESSION_SECRET:?Set SESSION_SECRET in the production environment secrets}"
+          : "${TUNNEL_TOKEN:?Set TUNNEL_TOKEN in the production environment secrets}"
+          if [ "${#SESSION_SECRET}" -lt 32 ]; then
+            echo "SESSION_SECRET must contain at least 32 characters."
+            exit 1
+          fi
+        env:
+          PAPERLESS_NETWORK: ${{ vars.PAPERLESS_NETWORK }}
+          PAPERLESS_SERVICE_TOKEN: ${{ secrets.PAPERLESS_SERVICE_TOKEN }}
+          SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
+          TUNNEL_TOKEN: ${{ secrets.TUNNEL_TOKEN }}
 
       - name: Deploy with Docker Compose
         run: |
