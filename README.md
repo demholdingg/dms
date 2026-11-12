@@ -200,14 +200,14 @@ docker compose up -d --build
 
 Workflow `.github/workflows/deploy.yml` menjalankan pemeriksaan tipe, test, dan build pada setiap pull request ke `develop` atau `main`. Setelah perubahan di-push ke `develop`, aplikasi di-deploy ke development; push ke `main` men-deploy production. Deployment dilakukan Docker Compose langsung oleh self-hosted runner di masing-masing server—tidak memakai SSH.
 
-1. Siapkan dua Linux server/VM (atau dua runner dengan akses Docker terpisah). Pasang Docker Engine dan Docker Compose v2.17+, lalu pasang GitHub Actions self-hosted runner pada masing-masing target. Beri label tambahan `development` dan `production`; label bawaan `self-hosted` dan `linux` juga harus tersedia.
-2. Pastikan user runner dapat menjalankan `docker compose`, network Docker Paperless sudah dibuat, dan setiap environment memakai network yang sesuai.
+1. Siapkan satu Linux server dengan Docker Engine, Docker Compose v2.17+, dan satu GitHub Actions self-hosted runner. Workflow menggunakan label bawaan `self-hosted` dan `linux`; tidak memerlukan label `development` atau `production`.
+2. Pastikan user runner dapat menjalankan `docker compose` dan server terhubung ke network Docker Paperless.
 3. Buat GitHub Environments bernama `development` dan `production`. Batasi branch deployment masing-masing ke `develop` dan `main`; aktifkan required reviewer untuk `production` bila perlu persetujuan sebelum deploy.
-4. Tambahkan **variables** di kedua Environment: `PAPERLESS_NETWORK`, `PAPERLESS_URL`, `PAPERLESS_PUBLIC_URL`, `APP_URL`, `PORTAL_PORT`, `COOKIE_SECURE`, `DISPLAY_TZ`, `SESSION_HOURS`, `SEARCH_MIN_CHARS`, `MAX_GRANT_ATTEMPTS`, `PAPERLESS_HOST_HEADER`, `AUDIT_URL`, `AUDIT_VIEWERS`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, dan `SMTP_FROM`. Atur URL dan port sesuai masing-masing environment.
+4. Tambahkan **variables** di kedua Environment: `PAPERLESS_NETWORK`, `PAPERLESS_URL`, `PAPERLESS_PUBLIC_URL`, `APP_URL`, `PORTAL_PORT`, `COOKIE_SECURE`, `DISPLAY_TZ`, `SESSION_HOURS`, `SEARCH_MIN_CHARS`, `MAX_GRANT_ATTEMPTS`, `PAPERLESS_HOST_HEADER`, `AUDIT_URL`, `AUDIT_VIEWERS`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, dan `SMTP_FROM`. Karena kedua environment berjalan di server yang sama, tetapkan `PORTAL_PORT` yang berbeda untuk development dan production (misalnya `3001` dan `3000`) dan URL `APP_URL` masing-masing.
 5. Tambahkan **secrets** pada masing-masing Environment: `PAPERLESS_SERVICE_TOKEN` dan `SESSION_SECRET` (minimal 32 karakter acak). `SMTP_PASS`, `AUDIT_API_KEY`, dan `NOTIFY_WEBHOOK_URL` bersifat opsional.
 6. Buat pull request ke `develop` untuk validasi. Setelah merge/push, periksa tab **Actions**. Workflow juga dapat dijalankan manual dari branch `develop` atau `main`.
 
-Compose menggunakan project terpisah (`approval-portal-development` dan `approval-portal-production`), sehingga volume SQLite `portal_data` tidak bercampur. Deploy menunggu health check aplikasi sebelum dinyatakan berhasil; jangan menjalankan `docker compose down -v` karena perintah itu menghapus volume data.
+Compose menggunakan project terpisah (`approval-portal-development` dan `approval-portal-production`), sehingga volume SQLite `portal_data` tidak bercampur walaupun menggunakan runner/server yang sama. Deploy menunggu health check aplikasi sebelum dinyatakan berhasil; jangan menjalankan `docker compose down -v` karena perintah itu menghapus volume data.
 
 Jika kredensial dari konfigurasi lama pernah dipublikasikan, rotasi kredensial tersebut di layanan terkait; menghapusnya dari file terbaru tidak menghapusnya dari riwayat Git.
 

@@ -47,7 +47,7 @@ jobs:
     name: Deploy development
     if: github.ref == 'refs/heads/develop' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     needs: validate
-    runs-on: [self-hosted, linux, development]
+    runs-on: [self-hosted, linux]
     environment:
       name: development
     steps:
@@ -87,7 +87,7 @@ jobs:
     name: Deploy production
     if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     needs: validate
-    runs-on: [self-hosted, linux, production]
+    runs-on: [self-hosted, linux]
     environment:
       name: production
     steps:
