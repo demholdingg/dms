@@ -20,6 +20,6 @@ jobs:
       # 2. Perintah ke server untuk memperbarui container dengan image baru
       - name: Update Container on Server
         run: |
-          cd /path/ke/folder/docker-compose/di/server
+          cd /home/administrator/docker/dmsportal
           docker compose pull
           docker compose up -d --force-recreate
