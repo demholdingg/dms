@@ -61,7 +61,7 @@ jobs:
         env:
           IMAGE_TAG: ${{ github.sha }}
           PORTAL_PORT: ${{ vars.PORTAL_PORT }}
-          PAPERLESS_NETWORK: ${{ vars.paperless_default }}
+          PAPERLESS_NETWORK: ${{ paperless_default }}
           PAPERLESS_URL: "${PAPERLESS_URL:-http://192.168.10.109:8010}"
           PAPERLESS_PUBLIC_URL: "${PAPERLESS_PUBLIC_URL:-http://192.168.10.109:8010}"
           PAPERLESS_SERVICE_TOKEN: "${PAPERLESS_SERVICE_TOKEN:-c4e854dd2ddcb5a5c28fec8720688188f54718d6}"
@@ -102,7 +102,7 @@ jobs:
         env:
           IMAGE_TAG: ${{ github.sha }}
           PORTAL_PORT: ${{ vars.PORTAL_PORT }}
-          PAPERLESS_NETWORK: ${{ vars.paperless_default }}
+          PAPERLESS_NETWORK: ${{ paperless_default }}
           PAPERLESS_URL: "${PAPERLESS_URL:-http://192.168.10.109:8010}"
           PAPERLESS_PUBLIC_URL: "${PAPERLESS_PUBLIC_URL:-http://192.168.10.109:8010}"
           PAPERLESS_SERVICE_TOKEN: "${PAPERLESS_SERVICE_TOKEN:-c4e854dd2ddcb5a5c28fec8720688188f54718d6}"
