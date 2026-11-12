@@ -1,31 +1,25 @@
-name: Deploy Portal Approval to Production
+name: Build and Deploy Container
 
 on:
   push:
-    branches: ["main"] # Ganti dengan "master" jika branch utama Anda master
+    branches: ["main"]
 
 jobs:
-  deploy:
-    runs-on: self-hosted # Menggunakan runner di server Linux produksi Anda
+  build-and-deploy:
+    runs-on: self-hosted # atau ubuntu-latest jika ingin build di cloud GitHub
     steps:
-      - name: Checkout Repository
+      - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Verify Environment File (.env)
+      # 1. Build image dan push ke Docker Hub / Registry
+      - name: Build and Push Docker Image
         run: |
-          # Memastikan file .env sudah ada di server sebelum compose dijalankan
-          if [ ! -f .env ]; then
-            echo "Error: File .env tidak ditemukan di direktori server!"
-            echo "Silakan buat file .env berdasarkan .env.example terlebih dahulu."
-            exit 1
-          fi
+          docker build -t administrator/approval-portal:latest .
+          # docker push administrator/approval-portal:latest (jika menggunakan registry publik)
 
-      - name: Build and Restart Docker Compose
+      # 2. Perintah ke server untuk memperbarui container dengan image baru
+      - name: Update Container on Server
         run: |
-          echo "Menjalankan proses build dan restart container portal approval..."
-
-          # Turunkan kontainer lama, build image baru, dan jalankan di background
-          docker compose down
-          docker compose up -d --build
-
-          echo "Deployment berhasil diselesaikan!"
+          cd /path/ke/folder/docker-compose/di/server
+          docker compose pull
+          docker compose up -d --force-recreate

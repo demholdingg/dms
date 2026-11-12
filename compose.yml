@@ -1,7 +1,7 @@
 services:
   portal:
     build: .
-    image: approval-portal:1.1
+    image: administrator/approval-portal:latest
     restart: unless-stopped
     ports:
       - "${PORTAL_PORT:-3000}:3000"
