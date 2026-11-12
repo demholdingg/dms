@@ -30,37 +30,47 @@ jobs:
 
           echo "Deployment berhasil diselesaikan!"
 
-
-          services:
+services:
   portal:
     build: .
-    image: "${IMAGE_NAME:-approval-portal}:${IMAGE_TAG:-latest}"
+    image: approval-portal:1.1
     restart: unless-stopped
     ports:
       - "${PORTAL_PORT:-3000}:3000"
     environment:
-      PAPERLESS_URL: ${PAPERLESS_URL:-http://webserver:8000}
-      PAPERLESS_PUBLIC_URL: ${PAPERLESS_PUBLIC_URL:-http://localhost:8000}
-      PAPERLESS_SERVICE_TOKEN: ${PAPERLESS_SERVICE_TOKEN:?isi PAPERLESS_SERVICE_TOKEN}
-      SESSION_SECRET: ${SESSION_SECRET:?isi SESSION_SECRET (min 32 karakter)}
-      PAPERLESS_HOST_HEADER: ${PAPERLESS_HOST_HEADER:-}
-      APP_URL: ${APP_URL:-http://localhost:3000}
-      SESSION_HOURS: ${SESSION_HOURS:-8}
-      COOKIE_SECURE: ${COOKIE_SECURE:-false}
-      DISPLAY_TZ: ${DISPLAY_TZ:-Asia/Jakarta}
-      SEARCH_MIN_CHARS: ${SEARCH_MIN_CHARS:-3}
-      MAX_GRANT_ATTEMPTS: ${MAX_GRANT_ATTEMPTS:-10}
-      AUDIT_URL: ${AUDIT_URL:-http://audit:8080}
-      AUDIT_API_KEY: ${AUDIT_API_KEY:-}
-      AUDIT_VIEWERS: ${AUDIT_VIEWERS:-}
-      NOTIFY_WEBHOOK_URL: ${NOTIFY_WEBHOOK_URL:-}
-      SMTP_HOST: ${SMTP_HOST:-}
-      SMTP_PORT: ${SMTP_PORT:-587}
-      SMTP_USER: ${SMTP_USER:-}
-      SMTP_PASS: ${SMTP_PASS:-}
-      SMTP_FROM: ${SMTP_FROM:-approval@localhost}
+      PAPERLESS_URL: "${PAPERLESS_URL:-http://192.168.10.109:8010}"
+      PAPERLESS_PUBLIC_URL: "${PAPERLESS_PUBLIC_URL:-http://192.168.10.109:801}"
+      PAPERLESS_SERVICE_TOKEN: "${PAPERLESS_SERVICE_TOKEN:-c4e854dd2ddcb5a5c28fec8720688188f54718d6}"
+      PAPERLESS_HOST_HEADER: "${PAPERLESS_HOST_HEADER:-}"
+      PAPERLESS_WEBHOOK_SECRET: "${PAPERLESS_WEBHOOK_SECRET:-}"
+      SESSION_SECRET: "${SESSION_SECRET:-fh5M3xaNf/WSChJCn8qWsUlZ+e7Mr86Ypc2Hlo02F+rj576V8EanaTiK69c6sQ7I}"
+      SESSION_HOURS: "${SESSION_HOURS:-8}"
+      COOKIE_SECURE: "${COOKIE_SECURE:-false}"
+      APP_URL: "${APP_URL:-http://192.168.10.109:3000}"
+      DISPLAY_TZ: "${DISPLAY_TZ:-Asia/Jakarta}"
+      SEARCH_MIN_CHARS: "${SEARCH_MIN_CHARS:-3}"
+      MAX_GRANT_ATTEMPTS: "${MAX_GRANT_ATTEMPTS:-10}"
+      AUDIT_URL: "${AUDIT_URL:-http://audit:8080}"
+      AUDIT_API_KEY: "${AUDIT_API_KEY:-}"
+      AUDIT_VIEWERS: "${AUDIT_VIEWERS:-}"
+      NOTIFY_WEBHOOK_URL: "${NOTIFY_WEBHOOK_URL:-}"
+      SMTP_HOST: "${SMTP_HOST:-mail.dutaenergi.co.id}"
+      SMTP_PORT: "${SMTP_PORT:-993}"
+      SMTP_USER: "${SMTP_USER:-it@dutaenergi.co.id}"
+      SMTP_PASS: "${SMTP_PASS:-September93##}"
+      SMTP_FROM: "${SMTP_FROM:-mail.dutaenergi.co.id}"
     volumes:
       - portal_data:/data
+    networks: [paperless]
+
+  # Blok tunnel yang posisinya sudah benar di dalam services
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: tunnle_dms
+    restart: always
+    command: tunnel --no-autoupdate run
+    environment:
+      - TUNNEL_TOKEN=f94c3663-ec6b-4d7b-ae67-2f835a10db80
     networks: [paperless]
 
 volumes:
@@ -69,4 +79,4 @@ volumes:
 networks:
   paperless:
     external: true
-    name: ${PAPERLESS_NETWORK:?isi PAPERLESS_NETWORK}
+    name: ${PAPERLESS_NETWORK:-paperless_default}
